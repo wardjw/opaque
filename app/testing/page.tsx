@@ -1,7 +1,5 @@
-"use client"
-
 import { FC, useEffect, useRef } from 'react';
-import { Container, Sprite, Application } from '@pixi/react';
+import { Stage, Container, Sprite } from '@pixi/react';
 import { SCALE_MODES, Sprite as PixiSprite } from 'pixi.js';
 
 const Bunny: FC<{ x: number; y: number }> = ({ x, y }) => {
@@ -16,7 +14,7 @@ const Bunny: FC<{ x: number; y: number }> = ({ x, y }) => {
 
   const onDragMove = (event: any) => {
     if (bunnyRef.current) {
-      bunnyRef.current.parent.toLocal(event.global, null, bunnyRef.current.position);
+        bunnyRef.current.parent.toLocal(event.global, undefined, bunnyRef.current.position);
     }
   };
 
@@ -44,25 +42,22 @@ const Bunny: FC<{ x: number; y: number }> = ({ x, y }) => {
 };
 
 const Page: FC = () => {
-  const appRef = useRef<Application>(null);
+  const bunnies = useRef<Array<JSX.Element>>([]);
 
   useEffect(() => {
-    if (appRef.current) {
-      const texture = PixiSprite.from('https://pixijs.com/assets/bunny.png').texture;
-      texture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
-
-      for (let i = 0; i < 10; i++) {
-        const x = Math.floor(Math.random() * appRef.current.screen.width);
-        const y = Math.floor(Math.random() * appRef.current.screen.height);
-        appRef.current.stage.addChild(<Bunny x={x} y={y} />);
-      }
+    for (let i = 0; i < 10; i++) {
+      const x = Math.floor(Math.random() * window.innerWidth);
+      const y = Math.floor(Math.random() * window.innerHeight);
+      bunnies.current.push(<Bunny x={x} y={y} />);
     }
-  }, [appRef]);
+  }, []);
 
   return (
-    <Application ref={appRef} options={{ background: 0x1099bb, resizeTo: window }}>
-      <Container interactive={true} hitArea={appRef.current?.screen} />
-    </Application>
+    <Stage options={{ backgroundColor: 0x1099bb, resizeTo: window }}>
+      <Container interactive={true}>
+        {bunnies.current}
+      </Container>
+    </Stage>
   );
 };
 
