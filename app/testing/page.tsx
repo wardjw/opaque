@@ -1,3 +1,5 @@
+"use client"
+
 import { FC, useEffect, useRef } from 'react';
 import { Stage, Container, Sprite } from '@pixi/react';
 import { SCALE_MODES, Sprite as PixiSprite } from 'pixi.js';
