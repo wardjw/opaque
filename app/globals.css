@@ -2,26 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: #D435
+}
+
+
+
+.bookcase_title {
+  display: flex;
+  text-align: center;
+  width: 100%;
+  z-index: 1;
+}
+
+.toolbox {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 18px 32px;
+  gap: 15px;
+}
+
+.toolbox button {
+  background-color: aliceblue;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 7px;
+  padding-right: 7px;
+  border-radius: 5px;
 }

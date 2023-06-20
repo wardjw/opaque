@@ -1,0 +1,90 @@
+import * as PIXI from 'pixi.js';
+import { TrackingData } from '@pixi/events';
+
+const superAddEvents = PIXI.EventSystem.prototype.addEvents;
+const superRemoveEvents = PIXI.EventSystem.prototype.removeEvents;
+
+/**
+ * To add DOM native 'dblclick' event to the manager
+ * @private  
+ * @extends
+ */
+PIXI.EventSystem.prototype.addEvents = function () {
+    superAddEvents.call(this);
+
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+    this.processDoubleClick = this.processDoubleClick.bind(this);
+
+    if (this.eventDOMElement) {
+        this.eventDOMElement.addEventListener('dblclick', this.onDoubleClick, true);
+    }
+};
+
+/**
+ * @private
+ * @extends
+ */
+PIXI.EventSystem.prototype.removeEvents = function () {
+    if (this.eventDOMElement) {
+        this.eventDOMElement.removeEventListener('dblclick', this.onDoubleClick, true);
+    }
+    superRemoveEvents.call(this);
+};
+
+/**
+ * Processes the result of the double click check and dispatches the event
+ *
+ * @private
+ * @param {PIXI.event.FederatedEvent} FederatedEvent - The event event wrapping the DOM event
+ * @param {PIXI.Container|PIXI.Sprite|PIXI.TilingSprite} displayObject - The display object that was tested
+ * @param {boolean} hit - the result of the hit test on the display object
+ */
+PIXI.EventSystem.prototype.processDoubleClick = function (FederatedEvent, displayObject, hit) {
+    var data = FederatedEvent.data;
+    var id = FederatedEvent.data.identifier;
+
+    if (hit) {
+        if (!displayObject.trackedPointers[id]) {
+            displayObject.trackedPointers[id] = new TrackingData(id);
+        }
+        if (data.pointerType === 'mouse') {
+            this.dispatchEvent(displayObject, 'dblclick', FederatedEvent);
+        }
+    }
+};
+
+/**
+ * @param {PointerEvent} originalEvent
+ */
+PIXI.EventSystem.prototype.onDoubleClick = function (originalEvent) {
+    // if we support touch events, then only use those for touch events, not pointer events
+    if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') {
+        return;
+    }
+
+    const events = this.normalizeToPointerData(originalEvent);
+
+    if (this.autoPreventDefault && events[0].isNormalized) {
+        const cancelable = originalEvent.cancelable || !('cancelable' in originalEvent);
+
+        if (cancelable) {
+            originalEvent.preventDefault();
+        }
+    }
+
+    const eventLen = events.length;
+
+    for (let i = 0; i < eventLen; i++) {
+        const event = events[i];
+
+        const eventData = this.geteventDataForPointerId(event);
+
+        const FederatedEvent = this.configureFederatedEventForDOMEvent(this.eventData, event, eventData);
+
+        FederatedEvent.data.originalEvent = originalEvent;
+
+        this.processInteractive(FederatedEvent, this.renderer._lastObjectRendered, this.processDoubleClick, true);
+
+        this.emit('dblclick', FederatedEvent);
+    }
+};
